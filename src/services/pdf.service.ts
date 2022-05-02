@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { fromBuffer } from 'pdf2pic';
-import { WriteImageResponse } from 'pdf2pic/dist/types/writeImageResponse';
+// import { ToBase64Response } from 'pdf2pic/dist/types/toBase64Response';
 import * as PDFDocument from 'pdfkit';
 
 interface PdfOptions {
@@ -43,10 +43,10 @@ export class PdfService {
     }
 
     async generateImagesFromPdf(pdf: Express.Multer.File) {
-        const images: WriteImageResponse[] = await fromBuffer(pdf.buffer, {
-            quality: 1,
-        }).bulk();
+        const convert = await fromBuffer(pdf.buffer).bulk(-1, true);
 
-        return images;
+        console.log(convert);
+
+        return convert;
     }
 }
