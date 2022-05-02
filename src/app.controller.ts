@@ -1,25 +1,26 @@
+// import { UploadedFile } from '@nestjs/common';
 import {
     Controller,
     Post,
     Res,
-    StreamableFile,
     UploadedFiles,
     UseInterceptors,
     Param,
+    UploadedFile,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { DocxService } from './services/docx.service';
 import { PdfService } from './services/pdf.service';
 
 enum DocType {
-    PDF = 'pdf',
-    DOCX = 'docx',
+    IMGTOPDF = 'img-to-pdf',
+    IMGTODOCX = 'img-to-docx',
+    PDFTOIMG = 'pdf-to-img',
 }
 
 @Controller({
     path: '/api',
-    version: '1',
 })
 export class AppController {
     constructor(
@@ -27,25 +28,23 @@ export class AppController {
         private readonly docxService: DocxService,
     ) {}
 
-    @Post('/generate/:type')
+    @Post('/multi/:type')
     @UseInterceptors(FilesInterceptor('files'))
-    async getPDF(
+    async multiFiles(
         @UploadedFiles() files: Express.Multer.File[],
-        @Res({
-            passthrough: true,
-        })
+        @Res({ passthrough: true })
         res: Response,
         @Param('type') type: DocType,
     ) {
         let doc: Buffer = null;
 
-        if (type === DocType.PDF) {
+        if (type === DocType.IMGTOPDF) {
             doc = await this.pdfService.generatePdfFromImages(files);
             res.set({
                 'Content-Type': 'application/pdf',
                 'Content-Disposition': 'attachment; filename="document.pdf"',
             });
-        } else if (type === DocType.DOCX) {
+        } else if (type === DocType.IMGTODOCX) {
             doc = await this.docxService.generateDocxFromImages(files);
             res.set({
                 'Content-Type':
@@ -53,11 +52,30 @@ export class AppController {
                 'Content-Disposition': 'attachment; filename="document.docx"',
             });
         }
-
         res.set({
             'Content-Length': doc.length,
         });
 
-        return new StreamableFile(doc);
+        res.end(doc);
+    }
+
+    @Post('/single/:type')
+    @UseInterceptors(FileInterceptor('file'))
+    async singleFile(
+        @Param('type') type: DocType,
+        @Res() res: Response,
+        @UploadedFile() file: Express.Multer.File,
+    ) {
+        let doc = null;
+        console.log(file);
+        if (type === DocType.PDFTOIMG) {
+            doc = await this.pdfService.generateImagesFromPdf(file);
+            console.log(doc);
+            res.set({
+                'Content-Type': 'image/jpg',
+                'Content-Disposition': 'attachment; filename="filename.jpg"',
+            });
+        }
+        res.send(doc);
     }
 }
