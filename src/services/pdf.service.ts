@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { fromBuffer } from 'pdf2pic';
-// import { ToBase64Response } from 'pdf2pic/dist/types/toBase64Response';
 import * as PDFDocument from 'pdfkit';
+import * as mammoth from 'mammoth';
+import * as pdf from 'html-pdf';
 
 interface PdfOptions {
     fontSize: number;
@@ -42,11 +42,15 @@ export class PdfService {
         });
     }
 
-    async generateImagesFromPdf(pdf: Express.Multer.File) {
-        const convert = await fromBuffer(pdf.buffer).bulk(-1, true);
-
-        console.log(convert);
-
-        return convert;
+    docxToHtml(file: Express.Multer.File): Promise<Buffer> {
+        return new Promise(async (resolve, reject) => {
+            const docHtml = await mammoth.convertToHtml(file);
+            pdf.create(docHtml.value).toBuffer((err, buffer) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(buffer);
+            });
+        });
     }
 }
