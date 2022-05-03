@@ -1,13 +1,8 @@
 import { Injectable } from '@nestjs/common';
-// import { ToBase64Response } from 'pdf2pic/dist/types/toBase64Response';
 import * as PDFDocument from 'pdfkit';
-import * as gm from 'gm';
 import * as AdmZip from 'adm-zip';
 import { readFilesFromDir, removeFilesFromDir } from 'src/utils/fs';
-
-const im = gm.subClass({
-    imageMagick: true,
-});
+import { im } from 'src/utils/imagemagick';
 
 interface PdfOptions {
     fontSize: number;
