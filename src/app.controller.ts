@@ -7,6 +7,7 @@ import {
     UseInterceptors,
     Param,
     UploadedFile,
+    StreamableFile,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
@@ -56,26 +57,33 @@ export class AppController {
             'Content-Length': doc.length,
         });
 
-        res.end(doc);
+        return new StreamableFile(doc);
     }
 
     @Post('/single/:type')
     @UseInterceptors(FileInterceptor('file'))
     async singleFile(
         @Param('type') type: DocType,
-        @Res() res: Response,
+        @Res({
+            passthrough: true,
+        })
+        res: Response,
         @UploadedFile() file: Express.Multer.File,
     ) {
-        let doc = null;
-        console.log(file);
+        let doc: Buffer = null;
         if (type === DocType.PDFTOIMG) {
             doc = await this.pdfService.generateImagesFromPdf(file);
-            console.log(doc);
+
             res.set({
-                'Content-Type': 'image/jpg',
-                'Content-Disposition': 'attachment; filename="filename.jpg"',
+                'Content-Type': 'application/zip',
+                'Content-Disposition': 'attachment; filename="document.zip"',
             });
         }
-        res.send(doc);
+        res.set({
+            'Content-Length': doc.length,
+        });
+
+        res.status(200);
+        return new StreamableFile(doc);
     }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as sharp from 'sharp';
-import { ImageFormats } from 'src/values';
+import { ImageFormats } from '../values';
 
 @Injectable()
 export class ImageService {

@@ -9,12 +9,12 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
-import { ImageService } from 'src/services/image.service';
+import { ImageService } from '../services/image.service';
 import { ImageFormats } from '../values';
 
 @Controller('image')
 export class ImageController {
-    constructor(private imageService: ImageService) {}
+    constructor(private readonly imageService: ImageService) {}
 
     @Post('conversion/:type')
     @UseInterceptors(FileInterceptor('file'))
@@ -24,7 +24,7 @@ export class ImageController {
         @Param('type') type: ImageFormats,
     ) {
         const sharpObject = await this.imageService.createInstance(file);
-        let doc: Buffer = await this.imageService.changeFormat(
+        const doc: Buffer = await this.imageService.changeFormat(
             sharpObject,
             type,
         );
@@ -45,7 +45,7 @@ export class ImageController {
     ) {
         const sharpObject = await this.imageService.createInstance(file);
 
-        let doc = await this.imageService.compression(sharpObject, type);
+        const doc = await this.imageService.compression(sharpObject, type);
 
         res.set({
             'Content-Type': `image/${type}`,

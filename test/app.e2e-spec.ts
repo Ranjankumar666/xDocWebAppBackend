@@ -16,9 +16,9 @@ describe('AppController (e2e)', () => {
         await app.init();
     });
 
-    it('api/generate/docx (POST)', async () => {
+    it('api/multi/img-to-docx (POST)', async () => {
         return request(app.getHttpServer())
-            .post('/api/generate/docx/')
+            .post('/api/multi/img-to-docx/')
             .set('Content-Type', 'multipart/form-data')
             .attach(
                 'files',
@@ -33,9 +33,9 @@ describe('AppController (e2e)', () => {
             .expect(201);
     });
 
-    it('api/generate/pdf (POST)', async () => {
+    it('api/multi/img-to-pdf (POST)', async () => {
         return request(app.getHttpServer())
-            .post('/api/generate/pdf/')
+            .post('/api/multi/img-to-pdf/')
             .set('Content-Type', 'multipart/form-data')
             .attach(
                 'files',

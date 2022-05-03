@@ -3,10 +3,8 @@ import {
     Document,
     ImageRun,
     IMediaTransformation,
-    ISectionOptions,
     Packer,
     Paragraph,
-    SectionType,
 } from 'docx';
 
 @Injectable()
@@ -20,29 +18,33 @@ export class DocxService {
             height: 200,
         };
         const imageRun = new ImageRun({
-            data: image.buffer,
+            data: image.buffer.buffer,
             transformation: options || defaultOptions,
         });
 
         return imageRun;
     }
+
     generateDocxFromImages(images: Express.Multer.File[]): Promise<Buffer> {
         return new Promise((resolve) => {
-            const data: ISectionOptions[] = images.map((img) => ({
-                properties: {
-                    type: SectionType.NEXT_PAGE,
-                },
-                children: [
+            const data: Paragraph[] = images.map(
+                (img) =>
                     new Paragraph({
                         children: [this.createImageRunFromBuffer(img)],
                     }),
-                ],
-            }));
+            );
+
             const doc = new Document({
-                sections: data,
+                sections: [
+                    {
+                        children: data,
+                    },
+                ],
             });
 
-            resolve(Packer.toBuffer(doc));
+            Packer.toBuffer(doc).then((buffer) => {
+                resolve(buffer);
+            });
         });
     }
 }

@@ -1,7 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { fromBuffer } from 'pdf2pic';
 // import { ToBase64Response } from 'pdf2pic/dist/types/toBase64Response';
 import * as PDFDocument from 'pdfkit';
+import * as gm from 'gm';
+import * as AdmZip from 'adm-zip';
+import { readdir, readFile, rm } from 'fs/promises';
+import { join } from 'path';
+
+const im = gm.subClass({
+    imageMagick: true,
+});
 
 interface PdfOptions {
     fontSize: number;
@@ -16,7 +23,7 @@ export class PdfService {
     ): Promise<Buffer> {
         return new Promise((resolve) => {
             const doc = new PDFDocument({
-                size: 'LETTER',
+                size: 'A4',
                 margin: options?.margin || 25,
                 autoFirstPage: false,
                 bufferPages: true,
@@ -25,9 +32,7 @@ export class PdfService {
             doc.fontSize(options?.fontSize || 12);
 
             for (const image of images) {
-                doc.addPage().image(image.buffer.buffer, {
-                    scale: 0.5,
-                });
+                doc.addPage().image(image.buffer.buffer, { scale: 0.5 });
             }
 
             doc.on('data', (data) => {
@@ -42,11 +47,33 @@ export class PdfService {
         });
     }
 
-    async generateImagesFromPdf(pdf: Express.Multer.File) {
-        const convert = await fromBuffer(pdf.buffer).bulk(-1, true);
+    generateImagesFromPdf(pdf: Express.Multer.File): Promise<Buffer> {
+        return new Promise(async (resolve) => {
+            im(pdf.buffer)
+                .command('magick')
+                .write('./output/docu-%03d.png', async () => {
+                    const zip = new AdmZip();
+                    const dirFiles = await readdir('./output/');
 
-        console.log(convert);
+                    const files = dirFiles.map((file) => {
+                        const filePath = join(process.cwd(), './output', file);
 
-        return convert;
+                        return readFile(filePath);
+                    });
+
+                    const fileBuffer = await Promise.all(files);
+
+                    fileBuffer.forEach((content, i) => {
+                        zip.addFile(`${i}.png`, content);
+                    });
+
+                    resolve(zip.toBuffer());
+
+                    await rm('./output/', {
+                        force: true,
+                        recursive: true,
+                    });
+                });
+        });
     }
 }
