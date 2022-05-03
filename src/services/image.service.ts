@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import AdmZip from 'adm-zip';
+import * as AdmZip from 'adm-zip';
 import * as sharp from 'sharp';
 import { readFilesFromDir, removeFilesFromDir } from 'src/utils/fs';
 import { im } from 'src/utils/imagemagick';
