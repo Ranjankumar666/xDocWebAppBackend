@@ -3,8 +3,7 @@ import { Injectable } from '@nestjs/common';
 import * as PDFDocument from 'pdfkit';
 import * as gm from 'gm';
 import * as AdmZip from 'adm-zip';
-import { readdir, readFile, rm } from 'fs/promises';
-import { join } from 'path';
+import { readFilesFromDir, removeFilesFromDir } from 'src/utils/fs';
 
 const im = gm.subClass({
     imageMagick: true,
@@ -53,15 +52,9 @@ export class PdfService {
                 .command('magick')
                 .write('./output/docu-%03d.png', async () => {
                     const zip = new AdmZip();
-                    const dirFiles = await readdir('./output/');
+                    const directory = './output';
 
-                    const files = dirFiles.map((file) => {
-                        const filePath = join(process.cwd(), './output', file);
-
-                        return readFile(filePath);
-                    });
-
-                    const fileBuffer = await Promise.all(files);
+                    const fileBuffer = await readFilesFromDir(directory);
 
                     fileBuffer.forEach((content, i) => {
                         zip.addFile(`${i}.png`, content);
@@ -69,10 +62,7 @@ export class PdfService {
 
                     resolve(zip.toBuffer());
 
-                    await rm('./output/', {
-                        force: true,
-                        recursive: true,
-                    });
+                    await removeFilesFromDir(directory);
                 });
         });
     }
