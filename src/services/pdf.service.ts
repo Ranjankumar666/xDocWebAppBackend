@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as PDFDocument from 'pdfkit';
-import * as AdmZip from 'adm-zip';
-import { readFilesFromDir, removeFilesFromDir } from 'src/utils/fs';
-import { im } from 'src/utils/imagemagick';
+import * as mammoth from 'mammoth';
+import * as pdf from 'html-pdf';
 
 interface PdfOptions {
     fontSize: number;
@@ -41,24 +40,15 @@ export class PdfService {
         });
     }
 
-    generateImagesFromPdf(pdf: Express.Multer.File): Promise<Buffer> {
-        return new Promise(async (resolve) => {
-            im(pdf.buffer)
-                .command('magick')
-                .write('./output/docu-%03d.png', async () => {
-                    const zip = new AdmZip();
-                    const directory = './output';
-
-                    const fileBuffer = await readFilesFromDir(directory);
-
-                    fileBuffer.forEach((content, i) => {
-                        zip.addFile(`${i}.png`, content);
-                    });
-
-                    resolve(zip.toBuffer());
-
-                    await removeFilesFromDir(directory);
-                });
+    generatePdfFromDocx(file: Express.Multer.File): Promise<Buffer> {
+        return new Promise(async (resolve, reject) => {
+            const docHtml = await mammoth.convertToHtml(file);
+            pdf.create(docHtml.value).toBuffer((err, buffer) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(buffer);
+            });
         });
     }
 }
