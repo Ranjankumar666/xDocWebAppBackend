@@ -16,8 +16,8 @@ export class DocxService {
         options: IMediaTransformation = null,
     ) {
         const defaultOptions: IMediaTransformation = {
-            width: 200,
-            height: 200,
+            width: 500,
+            height: 500,
         };
         const imageRun = new ImageRun({
             data: image.buffer,
