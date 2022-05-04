@@ -5,6 +5,7 @@ import { readFilesFromDir, removeFilesFromDir } from 'src/utils/fs';
 import { im } from 'src/utils/imagemagick';
 import { ImageFormats } from '../values';
 import { PdfService } from './pdf.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ImageService {
@@ -33,10 +34,11 @@ export class ImageService {
     generateImagesFromPdf(pdf: Express.Multer.File | Buffer): Promise<Buffer> {
         return new Promise(async (resolve) => {
             const buf = Buffer.isBuffer(pdf) ? pdf : pdf.buffer;
+            const docname = uuidv4();
 
             im(buf)
                 .command('magick')
-                .write('./output/docu-%03d.png', async () => {
+                .write(`./output/${docname}-%03d.png`, async () => {
                     const zip = new AdmZip();
                     const directory = './output';
 

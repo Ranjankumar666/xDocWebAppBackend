@@ -4,9 +4,7 @@ import { join } from 'path';
 export const removeFilesFromDir = async (dir: string) => {
     const files = await readdir(dir);
     const removeFiles = files.map((file) => {
-        return rm(join(process.cwd(), dir, file), {
-            force: true,
-        });
+        return rm(join(process.cwd(), dir, file), { force: true });
     });
 
     await Promise.all(removeFiles);

@@ -6,6 +6,9 @@ import {
     Packer,
     Paragraph,
 } from 'docx';
+import { writeFile } from 'fs/promises';
+import { convertPdfToDocx } from 'src/utils/pdf2Docx';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class DocxService {
@@ -46,5 +49,15 @@ export class DocxService {
                 resolve(buffer);
             });
         });
+    }
+
+    async generateDocxfromPdf(pdf: Express.Multer.File): Promise<Buffer> {
+        const filename = uuidv4() + '.pdf';
+        const filePath = `./output/${filename}`;
+        await writeFile(filePath, pdf.buffer);
+
+        const doc = await convertPdfToDocx(filePath);
+
+        return doc;
     }
 }
