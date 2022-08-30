@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as AdmZip from 'adm-zip';
 import * as sharp from 'sharp';
-import { readFilesFromDir, removeFilesFromDir } from 'src/utils/fs';
-import { im } from 'src/utils/imagemagick';
+import { readFilesFromDir, removeFilesFromDir } from '../utils/fs';
+import { im } from '../utils/imagemagick';
 import { ImageFormats } from '../values';
 import { PdfService } from './pdf.service';
 import { v4 as uuidv4 } from 'uuid';

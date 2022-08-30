@@ -7,7 +7,7 @@ import {
     Paragraph,
 } from 'docx';
 import { writeFile } from 'fs/promises';
-import { convertPdfToDocx } from 'src/utils/pdf2Docx';
+import { convertPdfToDocx } from '../utils/pdf2Docx';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
