@@ -1,9 +1,11 @@
 import {
+    BadRequestException,
     Controller,
     HttpCode,
     Post,
     Res,
     StreamableFile,
+    UnsupportedMediaTypeException,
     UploadedFile,
     UploadedFiles,
     UseInterceptors,
@@ -39,6 +41,16 @@ export class DocxController {
         @UploadedFiles() files: Express.Multer.File[],
         @Res({ passthrough: true }) res: Response,
     ) {
+        if (files.length === 0)
+            throw new BadRequestException('Files are empty');
+
+        files.forEach((file) => {
+            if (!file.mimetype.startsWith('image/'))
+                throw new UnsupportedMediaTypeException(
+                    'Unsupported file format',
+                );
+        });
+
         const docxBuffer = await this.docxService.generateDocxFromImages(files);
         res.set({
             'Content-Type':
@@ -69,6 +81,10 @@ export class DocxController {
         @UploadedFile() file: Express.Multer.File,
         @Res({ passthrough: true }) res: Response,
     ) {
+        if (file === null) throw new BadRequestException('Files are empty');
+        if (file.mimetype !== 'application/pdf')
+            throw new UnsupportedMediaTypeException('Unsupported file format');
+
         const docxBuffer = await this.docxService.generateDocxfromPdf(file);
 
         res.set({
