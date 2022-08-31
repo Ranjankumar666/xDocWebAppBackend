@@ -31,7 +31,7 @@ export class ImageController {
     })
     @HttpCode(201)
     @UseInterceptors(FileInterceptor('file'))
-    @ApiConsumes('multipart/form-part')
+    @ApiConsumes('multipart/form-data')
     @ApiBody({
         description: 'convert jpeg tpo png and vice versa',
         type: FileUploadDto,
@@ -52,7 +52,7 @@ export class ImageController {
         );
         res.set({
             'Content-Type': `image/${type}`,
-            'Content-Disposition': `attachment; filename="${uuidv4}.${type}"`,
+            'Content-Disposition': `attachment; filename="${uuidv4()}.${type}"`,
             'Content-Length': doc.length,
         });
         return new StreamableFile(doc);
@@ -68,7 +68,7 @@ export class ImageController {
     })
     @HttpCode(201)
     @UseInterceptors(FileInterceptor('file'))
-    @ApiConsumes('multipart/form-part')
+    @ApiConsumes('multipart/form-data')
     @ApiBody({
         description: 'convert jpeg or png',
         type: FileUploadDto,
@@ -102,11 +102,11 @@ export class ImageController {
     @Post('from/:type')
     @ApiParam({
         name: 'type',
-        enum: ImageFormats,
+        enum: DocFormats,
     })
     @HttpCode(201)
     @UseInterceptors(FileInterceptor('file'))
-    @ApiConsumes('multipart/form-part')
+    @ApiConsumes('multipart/form-data')
     @ApiBody({
         description: 'convert jpeg or png',
         type: FileUploadDto,
