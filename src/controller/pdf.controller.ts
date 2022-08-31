@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Controller,
     HttpCode,
     Post,
@@ -39,6 +40,9 @@ export class PdfController {
         @UploadedFiles() files: Express.Multer.File[],
         @Res({ passthrough: true }) res: Response,
     ) {
+        if (files.length === 0)
+            throw new BadRequestException('Files are empty');
+
         const doc = await this.pdfService.generatePdfFromImages(files);
         res.set({
             'Content-Type': 'application/pdf',
@@ -69,6 +73,8 @@ export class PdfController {
         @UploadedFile() file: Express.Multer.File,
         @Res({ passthrough: true }) res: Response,
     ) {
+        if (file === null)
+            throw new BadRequestException('File is not selected');
         const pdfBuffer = await this.pdfService.generatePdfFromDocx(file);
 
         res.set({

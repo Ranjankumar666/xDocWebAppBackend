@@ -1,4 +1,5 @@
 import {
+    BadRequestException,
     Controller,
     HttpCode,
     Param,
@@ -45,6 +46,8 @@ export class ImageController {
         @Res({ passthrough: true }) res: Response,
         @Param('type') type: ImageFormats,
     ) {
+        if (file === null) throw new BadRequestException('Files are empty');
+
         const sharpObject = await this.imageService.createInstance(file);
         const doc: Buffer = await this.imageService.changeFormat(
             sharpObject,
@@ -82,6 +85,7 @@ export class ImageController {
         @Res({ passthrough: true }) res: Response,
         @Param('type') type: ImageFormats,
     ) {
+        if (file === null) throw new BadRequestException('Files are empty');
         const sharpObject = await this.imageService.createInstance(file);
 
         const doc = await this.imageService.compression(sharpObject, type);
@@ -120,6 +124,7 @@ export class ImageController {
         @Res({ passthrough: true }) res: Response,
         @Param('type') type: DocFormats,
     ) {
+        if (file === null) throw new BadRequestException('Files are empty');
         let doc: Buffer = null;
 
         if (type === DocFormats.PDF)
